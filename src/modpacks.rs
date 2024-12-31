@@ -1,5 +1,5 @@
 use crate::{config::Config, edit_modpack, utils::has_mods};
-use dialoguer::{theme::ColorfulTheme, Input, Select};
+use dialoguer::{theme::ColorfulTheme, FuzzySelect, Input, Select};
 use libium::modpack::zip_create_from_directory;
 use std::{
     env::temp_dir,
@@ -60,7 +60,7 @@ fn edit(config: Config) {
         return;
     }
 
-    let selection = Select::with_theme(&ColorfulTheme::default())
+    let selection = FuzzySelect::with_theme(&ColorfulTheme::default())
         .with_prompt("Which modpack would you like to edit?")
         .default(0)
         .max_length(25)
