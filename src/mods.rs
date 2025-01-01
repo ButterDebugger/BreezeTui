@@ -1,5 +1,5 @@
-use crate::{config::Config, utils::get_mod_names};
-use dialoguer::{theme::ColorfulTheme, Select};
+use crate::{config::Config, edit_mod, utils::get_mod_names};
+use dialoguer::{theme::ColorfulTheme, FuzzySelect, Select};
 use std::{
     fs::{self},
     path::PathBuf,
@@ -7,7 +7,7 @@ use std::{
 };
 
 pub fn gui(config: Config) {
-    let selections = &["List", "Clear"];
+    let selections = &["Edit", "Clear"];
 
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Regarding your mods, what would you like to do")
@@ -18,7 +18,7 @@ pub fn gui(config: Config) {
 
     if let Some(selection) = selection {
         match selection {
-            0 => list(config),
+            0 => edit(config),
             1 => clear(config),
             _ => panic!(),
         }
@@ -28,9 +28,9 @@ pub fn gui(config: Config) {
     }
 }
 
-fn list(config: Config) {
+fn edit(config: Config) {
     // Get the list of installed mods
-    let installed_mods = get_mod_names(config);
+    let installed_mods = get_mod_names(config.clone());
 
     if installed_mods.is_empty() {
         println!();
@@ -38,11 +38,19 @@ fn list(config: Config) {
         return;
     }
 
-    // Print all of the mod names
-    println!();
-    println!("Installed mods:");
-    for mod_name in installed_mods {
-        println!("- {}", mod_name);
+    let selection = FuzzySelect::with_theme(&ColorfulTheme::default())
+        .with_prompt("Which modpack would you like to edit?")
+        .default(0)
+        .max_length(25)
+        .items(&installed_mods)
+        .interact_opt()
+        .unwrap();
+
+    if let Some(selection) = selection {
+        edit_mod::gui(config, installed_mods[selection].clone());
+    } else {
+        println!();
+        println!("Returning to main menu");
     }
 }
 

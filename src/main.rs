@@ -1,5 +1,6 @@
 use dialoguer::{theme::ColorfulTheme, Select};
 mod config;
+mod edit_mod;
 mod edit_modpack;
 mod modpacks;
 mod mods;
