@@ -1,4 +1,4 @@
-use dialoguer::{Confirm, Input};
+use dialoguer::{theme::ColorfulTheme, Confirm, Input};
 use libium::{get_minecraft_dir, HOME};
 use serde::{Deserialize, Serialize};
 use std::{
@@ -54,7 +54,7 @@ pub fn init() -> Config {
     {
         println!();
 
-        let custom_path: String = Input::new()
+        let custom_path: String = Input::with_theme(&ColorfulTheme::default())
             .with_prompt("What is the path to the minecraft directory?")
             .interact_text()
             .unwrap();

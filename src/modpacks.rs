@@ -89,7 +89,7 @@ fn stash(config: Config) {
         PathBuf::from_str(config.dot_minecraft.as_str()).expect("Minecraft path is invalid");
 
     // Ask for the modpack's name
-    let modpack_name: String = Input::new()
+    let modpack_name: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt("What is the name of this modpack?")
         .interact_text()
         .unwrap();

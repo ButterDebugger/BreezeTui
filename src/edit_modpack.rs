@@ -64,7 +64,7 @@ fn rename(config: Config, modpack_name: String) {
     let modpack_file_name = modpack_name.clone() + ".zip";
 
     // Get the new name
-    let new_name: String = Input::new()
+    let new_name: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt("What is the new name of this modpack?")
         .interact_text()
         .unwrap();
