@@ -7,7 +7,7 @@ use std::{
 };
 
 pub fn gui(config: Config) {
-    let selections = &["Edit", "Clear"];
+    let selections = &["Edit", "Clear", "Reveal in File Explorer"];
 
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Regarding your mods, what would you like to do")
@@ -20,6 +20,7 @@ pub fn gui(config: Config) {
         match selection {
             0 => edit(config),
             1 => clear(config),
+            2 => open(config),
             _ => panic!(),
         }
     } else {
@@ -76,4 +77,16 @@ fn clear(config: Config) {
 
     println!();
     println!("Mods have been successfully cleared!");
+}
+
+fn open(config: Config) {
+    // Get minecraft path
+    let minecraft_path =
+        PathBuf::from_str(config.dot_minecraft.as_str()).expect("Minecraft path is invalid");
+
+    // Open the mods directory
+    let _ = open::that(minecraft_path.join("mods"));
+
+    println!();
+    println!("Opening mods directory!");
 }

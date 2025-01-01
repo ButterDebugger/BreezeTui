@@ -9,7 +9,7 @@ use std::{
 };
 
 pub fn gui(config: Config) {
-    let selections = &["Edit", "Stash"]; // TODO: add an "Import" option to add a modpack from a website
+    let selections = &["Edit", "Stash", "Reveal in File Explorer"]; // TODO: add an "Import" option to add a modpack from a website
 
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Regarding your modpacks, what would you like to do")
@@ -22,6 +22,7 @@ pub fn gui(config: Config) {
         match selection {
             0 => edit(config),
             1 => stash(config),
+            2 => open(config),
             _ => panic!(),
         }
     } else {
@@ -120,4 +121,16 @@ fn stash(config: Config) {
 
     println!();
     println!("Your mods have successfully been stashed away!")
+}
+
+fn open(config: Config) {
+    // Get minecraft path
+    let minecraft_path =
+        PathBuf::from_str(config.dot_minecraft.as_str()).expect("Minecraft path is invalid");
+
+    // Open the modpacks directory
+    let _ = open::that(minecraft_path.join("modpacks"));
+
+    println!();
+    println!("Opening modpacks directory!");
 }
