@@ -2,14 +2,16 @@ use dialoguer::{theme::ColorfulTheme, Select};
 mod config;
 mod edit_mod;
 mod edit_modpack;
+mod installations;
 mod modpacks;
 mod mods;
 mod utils;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let config = config::init();
 
-    let selections = &["Modpacks", "Mods"]; // TODO: add a "Configs" and "Installations" option
+    let selections = &["Modpacks", "Mods", "Installations"]; // TODO: add a "Configs" and "Installations" option
 
     loop {
         println!();
@@ -25,6 +27,7 @@ fn main() {
             match selection {
                 0 => modpacks::gui(config.clone()),
                 1 => mods::gui(config.clone()),
+                2 => installations::gui().await,
                 _ => panic!(),
             }
         } else {
