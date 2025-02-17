@@ -19,7 +19,9 @@ pub fn gui(config: Config) {
     if let Some(selection) = selection {
         match selection {
             0 => edit(config),
-            1 => clear(config),
+            1 => {
+                let _ = clear(config, false);
+            }
             2 => open(config),
             _ => panic!(),
         }
@@ -55,7 +57,12 @@ fn edit(config: Config) {
     }
 }
 
-fn clear(config: Config) {
+/// Clears the mods folder of jar files
+///
+/// # Returns
+///
+/// `true` if the clear was successful, and `false` otherwise.
+pub fn clear(config: Config, silent: bool) -> bool {
     // Get minecraft path
     let minecraft_path =
         PathBuf::from_str(config.dot_minecraft.as_str()).expect("Minecraft path is invalid");
@@ -64,9 +71,11 @@ fn clear(config: Config) {
     let installed_mods = get_mod_names(config);
 
     if installed_mods.is_empty() {
-        println!();
-        println!("No mods found");
-        return;
+        if !silent {
+            println!();
+            println!("No mods found");
+        }
+        return false;
     }
 
     // Delete every mod
@@ -75,8 +84,11 @@ fn clear(config: Config) {
         let _ = fs::remove_file(minecraft_path.join("mods").join(mod_file_name.clone()));
     }
 
-    println!();
-    println!("Mods have been successfully cleared!");
+    if !silent {
+        println!();
+        println!("Mods have been successfully cleared!");
+    }
+    return true;
 }
 
 fn open(config: Config) {

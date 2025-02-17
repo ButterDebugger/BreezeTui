@@ -3,6 +3,7 @@
         "dialoguer",
         "libium",
         "neoforge",
-        "reqwest"
+        "reqwest",
+        "sevenz"
     ]
 }

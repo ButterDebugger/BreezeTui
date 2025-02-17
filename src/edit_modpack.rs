@@ -1,4 +1,4 @@
-use crate::{config::Config, utils::has_mods};
+use crate::{config::Config, modpacks, mods, utils::has_mods};
 use dialoguer::{theme::ColorfulTheme, Input, Select};
 use libium::modpack::zip_extract;
 use std::{
@@ -30,7 +30,7 @@ pub fn gui(config: Config, modpack_name: String) {
     }
 }
 
-fn load(config: Config, modpack_name: String) {
+pub fn load(config: Config, modpack_name: String) {
     // Get minecraft path
     let minecraft_path =
         PathBuf::from_str(config.dot_minecraft.as_str()).expect("Minecraft path is invalid");
@@ -38,10 +38,31 @@ fn load(config: Config, modpack_name: String) {
     let modpack_file_name = modpack_name.clone() + ".zip";
 
     // Cancel if the user already has mods installed
-    if has_mods(config) {
-        println!();
-        println!("You cannot load a modpack with mods already installed");
-        return;
+    if has_mods(config.clone()) {
+        let selection = Select::with_theme(&ColorfulTheme::default())
+            .with_prompt("You already have mods installed. What would you like to do with them?")
+            .default(0)
+            .items(&["Stash", "Clear"])
+            .interact_opt()
+            .unwrap();
+
+        if let Some(selection) = selection {
+            let success = match selection {
+                0 => modpacks::stash(config.clone(), true),
+                1 => mods::clear(config.clone(), true),
+                _ => panic!(),
+            };
+
+            if !success {
+                println!();
+                println!("There was an error stashing your mods. Please try again.");
+                return;
+            }
+        } else {
+            println!();
+            println!("Returning to main menu");
+            return;
+        }
     }
 
     // Extract the file into the mods dir

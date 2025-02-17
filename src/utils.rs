@@ -47,3 +47,30 @@ pub fn get_mod_names(config: Config) -> Vec<String> {
 
     return installed_mods;
 }
+
+pub fn get_modpack_names(config: Config) -> Vec<String> {
+    // Get minecraft path
+    let minecraft_path =
+        PathBuf::from_str(config.dot_minecraft.as_str()).expect("Minecraft path is invalid");
+
+    // Get the list of modpacks
+    let mut modpack_names: Vec<String> = Vec::new();
+    for ele in
+        fs::read_dir(minecraft_path.join("modpacks")).expect("Cannot read modpacks directory")
+    {
+        if let Ok(entry) = ele {
+            let entry_path = entry.path();
+            if entry_path.is_file() && entry_path.extension().unwrap() == "zip" {
+                modpack_names.push(
+                    entry_path
+                        .file_stem()
+                        .unwrap()
+                        .to_string_lossy()
+                        .to_string(),
+                );
+            }
+        }
+    }
+
+    return modpack_names;
+}
