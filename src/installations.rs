@@ -21,7 +21,7 @@ struct NeoforgeVersion {
     version: String,
 }
 
-pub async fn gui() {
+pub async fn cli() {
     let selections = &["Fabric", "Quilt", "Neoforge"];
 
     let selection = Select::with_theme(&ColorfulTheme::default())

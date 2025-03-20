@@ -6,7 +6,7 @@ use std::{
     str::FromStr,
 };
 
-pub fn gui(config: Config) {
+pub fn cli(config: Config) {
     let selections = &["Edit", "Clear", "Reveal in File Explorer"];
 
     let selection = Select::with_theme(&ColorfulTheme::default())
@@ -50,7 +50,7 @@ fn edit(config: Config) {
         .unwrap();
 
     if let Some(selection) = selection {
-        edit_mod::gui(config, installed_mods[selection].clone());
+        edit_mod::cli(config, installed_mods[selection].clone());
     } else {
         println!();
         println!("Returning to main menu");

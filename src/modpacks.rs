@@ -12,7 +12,7 @@ use std::{
     str::FromStr,
 };
 
-pub fn gui(config: Config) {
+pub fn cli(config: Config) {
     let selections = &["Edit", "Stash", "Import", "Reveal in File Explorer"]; // TODO: add an "Import" option to add a modpack from a website
 
     let selection = Select::with_theme(&ColorfulTheme::default())
@@ -57,7 +57,7 @@ fn edit(config: Config) {
         .unwrap();
 
     if let Some(selection) = selection {
-        edit_modpack::gui(config, modpack_names[selection].clone());
+        edit_modpack::cli(config, modpack_names[selection].clone());
     } else {
         println!();
         println!("Returning to main menu");

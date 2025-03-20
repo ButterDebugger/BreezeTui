@@ -25,9 +25,9 @@ async fn main() {
 
         if let Some(selection) = selection {
             match selection {
-                0 => modpacks::gui(config.clone()),
-                1 => mods::gui(config.clone()),
-                2 => installations::gui().await,
+                0 => modpacks::cli(config.clone()),
+                1 => mods::cli(config.clone()),
+                2 => installations::cli().await,
                 _ => panic!(),
             }
         } else {

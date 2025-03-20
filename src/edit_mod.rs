@@ -6,7 +6,7 @@ use std::{
     str::FromStr,
 };
 
-pub fn gui(config: Config, mod_name: String) {
+pub fn cli(config: Config, mod_name: String) {
     let selections = &["Delete"];
 
     let selection = Select::with_theme(&ColorfulTheme::default())

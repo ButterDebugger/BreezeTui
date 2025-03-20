@@ -7,7 +7,7 @@ use std::{
     str::FromStr,
 };
 
-pub fn gui(config: Config, modpack_name: String) {
+pub fn cli(config: Config, modpack_name: String) {
     let selections = &["Load", "Rename", "Delete"];
 
     let selection = Select::with_theme(&ColorfulTheme::default())
