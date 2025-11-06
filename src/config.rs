@@ -26,13 +26,14 @@ pub fn init() -> Config {
         // Read the config
         let maybe_config: Result<Config, serde_json::Error> = serde_json::from_reader(config_file);
 
-        if !maybe_config.is_err() {
-            let config: Config = maybe_config.unwrap();
+        if let Ok(config) = maybe_config {
             if config.version == CURRENT_CONFIG_VERSION {
                 return config;
             }
         }
+
         // Fall through and create a new config
+        todo!();
     }
 
     println!();
