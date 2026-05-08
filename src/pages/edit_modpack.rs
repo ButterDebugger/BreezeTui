@@ -1,4 +1,4 @@
-use crate::{config::Config, modpacks, mods, utils::has_mods, App};
+use crate::{App, config::Config, pages::{modpacks, mods}, utils::has_mods};
 use dialoguer::{theme::ColorfulTheme, Input, Select};
 use libium::modpack::zip_extract;
 use std::{

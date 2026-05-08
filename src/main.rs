@@ -2,14 +2,7 @@ use crate::config::Config;
 use console::style;
 
 mod config;
-mod edit_mod;
-mod edit_modpack;
-mod home;
-mod installations;
-mod modpacks;
-mod modpacks_list;
-mod mods;
-mod mods_list;
+mod pages;
 mod utils;
 
 #[derive(Debug, Default, Clone, strum_macros::Display)]

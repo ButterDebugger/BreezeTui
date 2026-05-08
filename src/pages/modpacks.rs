@@ -1,8 +1,5 @@
 use crate::{
-    config::Config,
-    edit_modpack,
-    utils::{get_modpack_names, has_mods},
-    App, Page,
+    App, Page, config::Config, pages::edit_modpack, utils::{get_modpack_names, has_mods}
 };
 use console::style;
 use dialoguer::{theme::ColorfulTheme, FuzzySelect, Input, Select};
