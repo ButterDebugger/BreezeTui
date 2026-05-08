@@ -142,12 +142,16 @@ fn import(config: &Config) {
     let extension = extension.unwrap().to_str().unwrap();
     let file_stem = file_stem.unwrap().to_str().unwrap();
 
+    println!();
+
     // Ask the user for the modpacks name
     let pack_name: String = Input::with_theme(&ColorfulTheme::default())
         .with_prompt("What is the name of this modpack?")
         .with_initial_text(file_stem)
         .interact_text()
         .unwrap();
+
+    println!();
 
     // Save the modpack
     match extension {
@@ -196,6 +200,8 @@ fn import(config: &Config) {
         .items(&["Yes", "No"])
         .interact_opt()
         .unwrap();
+
+    println!();
 
     if let Some(selection) = use_selection {
         if selection == 0 {
