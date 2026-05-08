@@ -11,16 +11,17 @@ pub fn has_mods(config: Config) -> bool {
         PathBuf::from_str(config.dot_minecraft.as_str()).expect("Minecraft path is invalid");
 
     // Loop through each item in the mods path and check if there is a mod file
-    for ele in fs::read_dir(minecraft_path.join("mods")).expect("Cannot read mods directory") {
-        if let Ok(entry) = ele {
-            let entry_path = entry.path();
-            if entry_path.is_file() && entry_path.extension().unwrap() == "jar" {
-                return true;
-            }
+    for entry in fs::read_dir(minecraft_path.join("mods"))
+        .expect("Cannot read mods directory")
+        .flatten()
+    {
+        let entry_path = entry.path();
+        if entry_path.is_file() && entry_path.extension().unwrap() == "jar" {
+            return true;
         }
     }
 
-    return false;
+    false
 }
 
 pub fn get_mod_names(config: Config) -> Vec<String> {
@@ -30,22 +31,23 @@ pub fn get_mod_names(config: Config) -> Vec<String> {
 
     // Get the list of installed mods
     let mut installed_mods: Vec<String> = Vec::new();
-    for ele in fs::read_dir(minecraft_path.join("mods")).expect("Cannot read mods directory") {
-        if let Ok(entry) = ele {
-            let entry_path = entry.path();
-            if entry_path.is_file() && entry_path.extension().unwrap() == "jar" {
-                installed_mods.push(
-                    entry_path
-                        .file_stem()
-                        .unwrap()
-                        .to_string_lossy()
-                        .to_string(),
-                );
-            }
+    for entry in fs::read_dir(minecraft_path.join("mods"))
+        .expect("Cannot read mods directory")
+        .flatten()
+    {
+        let entry_path = entry.path();
+        if entry_path.is_file() && entry_path.extension().unwrap() == "jar" {
+            installed_mods.push(
+                entry_path
+                    .file_stem()
+                    .unwrap()
+                    .to_string_lossy()
+                    .to_string(),
+            );
         }
     }
 
-    return installed_mods;
+    installed_mods
 }
 
 pub fn get_modpack_names(config: Config) -> Vec<String> {
@@ -55,22 +57,21 @@ pub fn get_modpack_names(config: Config) -> Vec<String> {
 
     // Get the list of modpacks
     let mut modpack_names: Vec<String> = Vec::new();
-    for ele in
-        fs::read_dir(minecraft_path.join("modpacks")).expect("Cannot read modpacks directory")
+    for entry in fs::read_dir(minecraft_path.join("modpacks"))
+        .expect("Cannot read modpacks directory")
+        .flatten()
     {
-        if let Ok(entry) = ele {
-            let entry_path = entry.path();
-            if entry_path.is_file() && entry_path.extension().unwrap() == "zip" {
-                modpack_names.push(
-                    entry_path
-                        .file_stem()
-                        .unwrap()
-                        .to_string_lossy()
-                        .to_string(),
-                );
-            }
+        let entry_path = entry.path();
+        if entry_path.is_file() && entry_path.extension().unwrap() == "zip" {
+            modpack_names.push(
+                entry_path
+                    .file_stem()
+                    .unwrap()
+                    .to_string_lossy()
+                    .to_string(),
+            );
         }
     }
 
-    return modpack_names;
+    modpack_names
 }

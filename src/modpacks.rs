@@ -2,7 +2,9 @@ use crate::{
     config::Config,
     edit_modpack,
     utils::{get_modpack_names, has_mods},
+    App, Page,
 };
+use console::style;
 use dialoguer::{theme::ColorfulTheme, FuzzySelect, Input, Select};
 use libium::modpack::zip_create_from_directory;
 use std::{
@@ -10,61 +12,93 @@ use std::{
     fs::{self, create_dir_all},
     path::PathBuf,
     str::FromStr,
+    thread,
+    time::Duration,
 };
 
-pub fn cli(config: Config) {
-    let selections = &["Edit", "Stash", "Import", "Reveal in File Explorer"]; // TODO: add an "Import" option to add a modpack from a website
+#[derive(strum_macros::Display)]
+enum ModpacksOptions {
+    #[strum(to_string = "Edit")]
+    Edit,
+    #[strum(to_string = "Stash")]
+    Stash,
+    #[strum(to_string = "Import")]
+    Import,
+    #[strum(to_string = "Reveal in File Explorer")]
+    OpenExplorer,
+}
 
-    let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("Regarding your modpacks, what would you like to do")
-        .default(0)
-        .items(&selections[..])
-        .interact_opt()
-        .unwrap();
+impl App {
+    pub fn modpacks_cli(&mut self) {
+        let selections;
+        let modpack_names = get_modpack_names(self.config.clone());
 
-    if let Some(selection) = selection {
-        match selection {
-            0 => edit(config),
-            1 => {
-                let _ = stash(config, false);
+        if modpack_names.is_empty() {
+            selections = vec![
+                ModpacksOptions::Stash,
+                ModpacksOptions::Import,
+                ModpacksOptions::OpenExplorer,
+            ];
+
+            // Notify that there are no modpacks
+            println!("{} {}", style("!").red(), style("No Modpacks Saved").bold());
+        } else {
+            selections = vec![
+                ModpacksOptions::Edit,
+                ModpacksOptions::Stash,
+                ModpacksOptions::Import,
+                ModpacksOptions::OpenExplorer,
+            ];
+
+            // Print a sample of the modpacks
+            println!("{} {}", style("#").red(), style("Modpacks List").bold());
+
+            for modpack_name in modpack_names {
+                println!("  {}", modpack_name);
             }
-            2 => import(config),
-            3 => open(config),
-            _ => panic!(),
         }
-    } else {
+
         println!();
-        println!("Returning to main menu");
+
+        // Ask the user what they want to do
+        let selection = Select::with_theme(&ColorfulTheme::default())
+            .with_prompt("What would you like to do")
+            .default(0)
+            .items(&selections)
+            .interact_opt()
+            .unwrap();
+
+        if let Some(selection) = selection {
+            match selections[selection] {
+                ModpacksOptions::Edit => {
+                    self.goto(Page::ModpacksList);
+                }
+                ModpacksOptions::Stash => {
+                    println!();
+
+                    let _ = stash(&self.config, false);
+                    self.return_home();
+                }
+                ModpacksOptions::Import => {
+                    println!();
+
+                    import(&self.config);
+                    self.return_home();
+                }
+                ModpacksOptions::OpenExplorer => {
+                    println!();
+
+                    open_modpacks_folder_in_explorer(&self.config);
+                    self.return_home();
+                }
+            }
+        } else {
+            self.go_back();
+        }
     }
 }
 
-fn edit(config: Config) {
-    // Get the list of modpacks
-    let modpack_names: Vec<String> = get_modpack_names(config.clone());
-
-    if modpack_names.is_empty() {
-        println!();
-        println!("No modpacks found");
-        return;
-    }
-
-    let selection = FuzzySelect::with_theme(&ColorfulTheme::default())
-        .with_prompt("Which modpack would you like to edit?")
-        .default(0)
-        .max_length(25)
-        .items(&modpack_names)
-        .interact_opt()
-        .unwrap();
-
-    if let Some(selection) = selection {
-        edit_modpack::cli(config, modpack_names[selection].clone());
-    } else {
-        println!();
-        println!("Returning to main menu");
-    }
-}
-
-fn import(config: Config) {
+fn import(config: &Config) {
     // Get minecraft path
     let minecraft_path =
         PathBuf::from_str(config.dot_minecraft.as_str()).expect("Minecraft path is invalid");
@@ -75,8 +109,9 @@ fn import(config: Config) {
     let archive_path = rfd::FileDialog::new().pick_file();
 
     if archive_path.is_none() {
-        println!();
         println!("No file selected");
+
+        thread::sleep(Duration::from_millis(2500));
         return;
     }
 
@@ -84,8 +119,9 @@ fn import(config: Config) {
 
     // Check if file exists
     if !archive_path.is_file() {
-        println!();
         println!("The file {} does not exist", archive_path.display());
+
+        thread::sleep(Duration::from_millis(2500));
         return;
     }
 
@@ -94,11 +130,12 @@ fn import(config: Config) {
     let file_stem = archive_path.file_stem();
 
     if extension.is_none() || file_stem.is_none() {
-        println!();
         println!(
             "The file {} is not a valid modpack archive",
             archive_path.display()
         );
+
+        thread::sleep(Duration::from_millis(2500));
         return;
     }
 
@@ -139,14 +176,15 @@ fn import(config: Config) {
                 .join("modpacks")
                 .join(pack_name.clone() + ".zip");
 
-            let _ = zip_create_from_directory(&modpack_path, &temp_path).unwrap();
+            zip_create_from_directory(&modpack_path, &temp_path).unwrap();
         }
         _ => {
-            println!();
             println!(
                 "The file {} is not a supported modpack archive at this time",
                 archive_path.display()
             );
+
+            thread::sleep(Duration::from_millis(2500));
             return;
         }
     }
@@ -171,15 +209,16 @@ fn import(config: Config) {
 /// # Returns
 ///
 /// `true` if the stash was successful, and `false` otherwise.
-pub fn stash(config: Config, silent: bool) -> bool {
+pub fn stash(config: &Config, silent: bool) -> bool {
     // Get minecraft path
     let minecraft_path =
         PathBuf::from_str(config.dot_minecraft.as_str()).expect("Minecraft path is invalid");
 
     if !has_mods(config.clone()) {
         if !silent {
-            println!();
             println!("You do not have any mods installed");
+
+            thread::sleep(Duration::from_millis(2500));
         }
         return false;
     }
@@ -192,10 +231,13 @@ pub fn stash(config: Config, silent: bool) -> bool {
         .interact_opt()
         .unwrap();
 
+    println!();
+
     if replace_selection.is_none() {
         if !silent {
-            println!();
             println!("Returning to main menu");
+
+            thread::sleep(Duration::from_millis(2500));
         }
         return false;
     }
@@ -232,21 +274,24 @@ pub fn stash(config: Config, silent: bool) -> bool {
         _ => panic!(),
     };
 
+    println!();
+
     // Create temp directory
     let temp_path = temp_dir().join("breeze_mods");
     create_dir_all(temp_path.clone()).expect("Failed to create temp directory");
 
     // Move all active mods to the temp directory
-    for ele in fs::read_dir(minecraft_path.join("mods")).expect("Cannot read mods directory") {
-        if let Ok(entry) = ele {
-            let entry_path = entry.path();
-            if entry_path.is_file() && entry_path.extension().unwrap() == "jar" {
-                let _ = fs::rename(
-                    // TODO: handle error (program using jar)
-                    entry_path.clone(),
-                    temp_path.join(entry_path.file_name().unwrap()),
-                );
-            }
+    for entry in fs::read_dir(minecraft_path.join("mods"))
+        .expect("Cannot read mods directory")
+        .flatten()
+    {
+        let entry_path = entry.path();
+        if entry_path.is_file() && entry_path.extension().unwrap() == "jar" {
+            let _ = fs::rename(
+                // TODO: handle error (program using jar)
+                entry_path.clone(),
+                temp_path.join(entry_path.file_name().unwrap()),
+            );
         }
     }
 
@@ -258,13 +303,15 @@ pub fn stash(config: Config, silent: bool) -> bool {
     let _ = fs::remove_dir_all(temp_path);
 
     if !silent {
-        println!();
         println!("Your mods have successfully been stashed away!");
+
+        thread::sleep(Duration::from_millis(2500));
     }
-    return true;
+
+    true
 }
 
-fn open(config: Config) {
+fn open_modpacks_folder_in_explorer(config: &Config) {
     // Get minecraft path
     let minecraft_path =
         PathBuf::from_str(config.dot_minecraft.as_str()).expect("Minecraft path is invalid");
@@ -272,6 +319,7 @@ fn open(config: Config) {
     // Open the modpacks directory
     let _ = open::that(minecraft_path.join("modpacks"));
 
-    println!();
     println!("Opening modpacks directory!");
+
+    thread::sleep(Duration::from_millis(2500));
 }

@@ -1,3 +1,4 @@
+use crate::App;
 use dialoguer::{theme::ColorfulTheme, Select};
 use reqwest::Client;
 use serde::Deserialize;
@@ -5,6 +6,8 @@ use std::{
     env::temp_dir,
     fs::{create_dir_all, File},
     io::Write,
+    thread,
+    time::Duration,
 };
 
 #[derive(Deserialize, Debug)]
@@ -21,26 +24,31 @@ struct NeoforgeVersion {
     version: String,
 }
 
-pub async fn cli() {
-    let selections = &["Fabric", "Quilt", "Neoforge"];
+impl App {
+    pub async fn installations_cli(&mut self) {
+        let selections = &["Fabric", "Quilt", "Neoforge"];
 
-    let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("Which mod loader would you like to install?")
-        .default(0)
-        .items(&selections[..])
-        .interact_opt()
-        .unwrap();
+        let selection = Select::with_theme(&ColorfulTheme::default())
+            .with_prompt("Which mod loader would you like to install?")
+            .default(0)
+            .items(&selections[..])
+            .interact_opt()
+            .unwrap();
 
-    if let Some(selection) = selection {
-        match selection {
-            0 => install_fabric().await,
-            1 => install_quilt().await,
-            2 => install_neoforge().await,
-            _ => panic!(),
+        if let Some(selection) = selection {
+            println!();
+
+            match selection {
+                0 => install_fabric().await,
+                1 => install_quilt().await,
+                2 => install_neoforge().await,
+                _ => unreachable!(),
+            }
+
+            self.return_home();
+        } else {
+            self.go_back();
         }
-    } else {
-        println!();
-        println!("Returning to main menu");
     }
 }
 
@@ -48,8 +56,10 @@ async fn install_fabric() {
     // Create an HTTP client
     let client = reqwest::Client::builder().build();
 
-    if client.is_err() {
-        println!("Failed to create http client: {}", client.unwrap_err());
+    if let Err(err) = client {
+        println!("Failed to create http client: {}", err);
+
+        thread::sleep(Duration::from_millis(2500));
         return;
     }
 
@@ -61,8 +71,10 @@ async fn install_fabric() {
         .send()
         .await;
 
-    if res.is_err() {
-        println!("Request failed: {}", res.unwrap_err());
+    if let Err(err) = res {
+        println!("Request failed: {}", err);
+
+        thread::sleep(Duration::from_millis(2500));
         return;
     }
 
@@ -71,22 +83,28 @@ async fn install_fabric() {
     // Check if the request was successful
     if !res.status().is_success() {
         println!("Request failed with status: {}", res.status());
+
+        thread::sleep(Duration::from_millis(2500));
         return;
     }
 
     // Get and parse the response body
     let body = res.json::<Vec<FabricVersion>>().await;
-    if body.is_err() {
-        println!("Failed to parse JSON: {}", body.unwrap_err());
+    if let Err(err) = body {
+        println!("Failed to parse JSON: {}", err);
+
+        thread::sleep(Duration::from_millis(2500));
         return;
     }
 
     let body = body.unwrap();
 
-    // Get the first (latest) version entry
-    let entry = body.get(0);
+    // Get the latest version entry
+    let entry = body.first();
     if entry.is_none() {
         println!("Failed to get latest version");
+
+        thread::sleep(Duration::from_millis(2500));
         return;
     }
 
@@ -105,8 +123,10 @@ async fn install_quilt() {
     // Create an HTTP client
     let client = reqwest::Client::builder().build();
 
-    if client.is_err() {
-        println!("Failed to create http client: {}", client.unwrap_err());
+    if let Err(err) = client {
+        println!("Failed to create http client: {}", err);
+
+        thread::sleep(Duration::from_millis(2500));
         return;
     }
 
@@ -124,8 +144,10 @@ async fn install_neoforge() {
     // Create an HTTP client
     let client = reqwest::Client::builder().build();
 
-    if client.is_err() {
-        println!("Failed to create http client: {}", client.unwrap_err());
+    if let Err(err) = client {
+        println!("Failed to create http client: {}", err);
+
+        thread::sleep(Duration::from_millis(2500));
         return;
     }
 
@@ -137,8 +159,10 @@ async fn install_neoforge() {
         .send()
         .await;
 
-    if res.is_err() {
-        println!("Request failed: {}", res.unwrap_err());
+    if let Err(err) = res {
+        println!("Request failed: {}", err);
+
+        thread::sleep(Duration::from_millis(2500));
         return;
     }
 
@@ -147,13 +171,17 @@ async fn install_neoforge() {
     // Check if the request was successful
     if !res.status().is_success() {
         println!("Request failed with status: {}", res.status());
+
+        thread::sleep(Duration::from_millis(2500));
         return;
     }
 
     // Get and parse the response body
     let body = res.json::<NeoforgeVersion>().await;
-    if body.is_err() {
-        println!("Failed to parse JSON: {}", body.unwrap_err());
+    if let Err(err) = body {
+        println!("Failed to parse JSON: {}", err);
+
+        thread::sleep(Duration::from_millis(2500));
         return;
     }
 
@@ -169,8 +197,10 @@ async fn install_neoforge() {
 async fn download_and_execute(client: Client, url: String) {
     // Request the file
     let res = client.get(url).send().await;
-    if res.is_err() {
-        println!("Download failed: {}", res.unwrap_err());
+    if let Err(err) = res {
+        println!("Download failed: {}", err);
+
+        thread::sleep(Duration::from_millis(2500));
         return;
     }
 
@@ -179,6 +209,8 @@ async fn download_and_execute(client: Client, url: String) {
     // Check if the request was successful
     if !res.status().is_success() {
         println!("Download failed with status: {}", res.status());
+
+        thread::sleep(Duration::from_millis(2500));
         return;
     }
 
@@ -188,8 +220,8 @@ async fn download_and_execute(client: Client, url: String) {
 
     // Write the file
     let mut file = File::create(temp_path.join("installer.jar")).unwrap();
-    let mut content = res.bytes().await.unwrap();
-    file.write_all(&mut content).unwrap();
+    let content = res.bytes().await.unwrap();
+    file.write_all(&content).unwrap();
 
     // Execute the installer
     let child = std::process::Command::new("java")
@@ -198,8 +230,10 @@ async fn download_and_execute(client: Client, url: String) {
         .arg(temp_path.join("installer.jar"))
         .spawn();
 
-    if child.is_err() {
-        println!("Failed to execute installer: {}", child.unwrap_err());
+    if let Err(err) = child {
+        println!("Failed to execute installer: {}", err);
+
+        thread::sleep(Duration::from_millis(2500));
         return;
     }
 
@@ -207,4 +241,6 @@ async fn download_and_execute(client: Client, url: String) {
     child.unwrap().wait().unwrap();
 
     println!("Installer finished");
+
+    thread::sleep(Duration::from_millis(2500));
 }
