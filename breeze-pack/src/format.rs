@@ -64,6 +64,6 @@ pub struct Modpack {
 #[serde(tag = "source")]
 pub enum Updater {
     Github {
-        
+
     },
 }

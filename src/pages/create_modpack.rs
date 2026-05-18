@@ -1,12 +1,11 @@
-use std::{thread, time::Duration};
-
 use crate::{
-    modpacks::{format::Modpack, packer::Packer},
     utils::paths::{get_modpack_names, get_modpack_path},
     App,
 };
+use breeze_pack::{format::Modpack, packer::Packer};
 use dialoguer::Input;
 use regex::Regex;
+use std::{thread, time::Duration};
 
 impl App {
     pub fn create_modpack_cli(&mut self) {

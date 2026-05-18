@@ -1,8 +1,8 @@
-use crate::modpacks::{
+use crate::{
     format::{Branch, Mod, ModLoader, Modpack},
     packer::Packer,
 };
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 pub mod format;
 pub mod packer;

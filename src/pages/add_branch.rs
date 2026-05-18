@@ -1,19 +1,17 @@
-use std::{thread, time::Duration};
-
-use dialoguer::{theme::ColorfulTheme, FuzzySelect, Input};
-use regex::Regex;
-
 use crate::{
-    modpacks::{
-        format::{Branch, ModLoader, Modpack},
-        packer::Packer,
-    },
     utils::{
         minecraft_versions::{get_release_version_names, get_version_names},
         paths::get_modpack_path,
     },
     App,
 };
+use breeze_pack::{
+    format::{Branch, ModLoader, Modpack},
+    packer::Packer,
+};
+use dialoguer::{theme::ColorfulTheme, FuzzySelect, Input};
+use regex::Regex;
+use std::{thread, time::Duration};
 
 impl App {
     pub async fn add_branch_cli(&mut self, modpack_name: String) {

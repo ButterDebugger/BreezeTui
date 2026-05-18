@@ -2,7 +2,6 @@ use crate::config::Config;
 use console::style;
 
 mod config;
-mod modpacks;
 mod pages;
 mod utils;
 

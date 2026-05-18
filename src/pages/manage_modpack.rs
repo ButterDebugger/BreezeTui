@@ -1,4 +1,5 @@
-use crate::{modpacks::packer::Packer, utils::paths::get_modpack_path, App, Page};
+use crate::{utils::paths::get_modpack_path, App, Page};
+use breeze_pack::packer::Packer;
 use console::style;
 use dialoguer::{theme::ColorfulTheme, Select};
 use std::{

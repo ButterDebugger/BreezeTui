@@ -1,6 +1,6 @@
+use crate::{utils::paths::get_modpack_path, App};
+use breeze_pack::packer::Packer;
 use dialoguer::{theme::ColorfulTheme, Input, Select};
-
-use crate::{modpacks::packer::Packer, utils::paths::get_modpack_path, App};
 
 #[derive(strum_macros::Display)]
 enum ManageOptions {

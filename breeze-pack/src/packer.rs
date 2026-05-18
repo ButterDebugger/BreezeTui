@@ -1,7 +1,4 @@
-use crate::modpacks::{
-    self,
-    format::{Branch, Modpack},
-};
+use crate::format::{Branch, Modpack};
 use anyhow::{anyhow, Ok, Result};
 use std::{
     env::temp_dir,
