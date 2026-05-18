@@ -1,7 +1,11 @@
+mod add_branch;
+mod branch_list;
+mod create_modpack;
 mod edit_mod;
-mod edit_modpack;
 mod home;
 mod installations;
+mod manage_branch;
+mod manage_modpack;
 mod modpacks;
 mod modpacks_list;
 mod mods;

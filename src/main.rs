@@ -2,6 +2,7 @@ use crate::config::Config;
 use console::style;
 
 mod config;
+mod modpacks;
 mod pages;
 mod utils;
 
@@ -20,8 +21,16 @@ enum Page {
     Modpacks,
     #[strum(to_string = "Modpacks List")]
     ModpacksList,
-    #[strum(to_string = "Edit Modpack")]
-    EditModpack(String),
+    #[strum(to_string = "Manage Modpack")]
+    ManageModpack(String),
+    #[strum(to_string = "Add Branch")]
+    AddBranch(String),
+    #[strum(to_string = "Branch List")]
+    BranchList(String),
+    #[strum(to_string = "Manage Branch")]
+    ManageBranch(String, String),
+    #[strum(to_string = "Create Modpack")]
+    CreateModpack,
     #[strum(to_string = "Installations")]
     Installations,
 }
@@ -34,8 +43,20 @@ struct App {
 
 impl App {
     fn new() -> Self {
+        // Get the config
+        let config = if let Some(loaded_config) = Config::load_from_disk() {
+            loaded_config
+        } else {
+            Config::create_config_prompt()
+        };
+
+        // Initialize and save the config
+        config.clone().init();
+        config.clone().save();
+
+        // Return the app
         Self {
-            config: Config::new(),
+            config,
             path: vec![Page::default()],
         }
     }
@@ -104,8 +125,18 @@ impl App {
                 Page::ModsList => self.mods_list_cli(),
                 Page::EditMod(mod_name) => self.edit_mod_cli(mod_name.to_string()),
                 Page::Modpacks => self.modpacks_cli(),
+                Page::CreateModpack => self.create_modpack_cli(),
                 Page::ModpacksList => self.modpacks_list_cli(),
-                Page::EditModpack(modpack_name) => self.edit_modpack_cli(modpack_name.to_string()),
+                Page::AddBranch(modpack_name) => {
+                    self.add_branch_cli(modpack_name.to_string()).await
+                }
+                Page::ManageModpack(modpack_name) => {
+                    self.edit_modpack_cli(modpack_name.to_string()).await
+                }
+                Page::BranchList(modpack_name) => self.branch_list_cli(modpack_name.to_string()),
+                Page::ManageBranch(modpack_name, branch_name) => {
+                    self.manage_branch_cli(modpack_name.to_string(), branch_name.to_string())
+                }
                 Page::Installations => self.installations_cli().await,
             }
         }

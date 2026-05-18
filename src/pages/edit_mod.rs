@@ -13,7 +13,7 @@ impl App {
         let selections = &["Delete"];
 
         let selection = Select::with_theme(&ColorfulTheme::default())
-            .with_prompt("What would you like to do to ".to_owned() + &mod_name)
+            .with_prompt(format!("What would you like to do to {}", mod_name))
             .default(0)
             .items(&selections[..])
             .interact_opt()

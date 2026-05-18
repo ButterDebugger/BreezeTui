@@ -1,4 +1,4 @@
-use crate::{utils::get_mod_names, App, Page};
+use crate::{utils::paths::get_mod_names, App, Page};
 use dialoguer::{theme::ColorfulTheme, FuzzySelect};
 use std::{thread, time::Duration};
 
@@ -17,7 +17,7 @@ impl App {
         }
 
         let selection = FuzzySelect::with_theme(&ColorfulTheme::default())
-            .with_prompt("Which modpack would you like to edit?")
+            .with_prompt("Which mod would you like to edit?")
             .default(0)
             .max_length(25)
             .items(&installed_mods)

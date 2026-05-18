@@ -1,11 +1,11 @@
-use crate::{utils::get_modpack_names, App, Page};
+use crate::{utils::paths::get_modpack_names, App, Page};
 use dialoguer::{theme::ColorfulTheme, FuzzySelect};
 use std::{thread, time::Duration};
 
 impl App {
     pub fn modpacks_list_cli(&mut self) {
         // Get the list of modpacks
-        let modpack_names: Vec<String> = get_modpack_names(self.config.clone());
+        let modpack_names: Vec<String> = get_modpack_names();
 
         if modpack_names.is_empty() {
             println!("No modpacks found");
@@ -25,7 +25,7 @@ impl App {
             .unwrap();
 
         if let Some(selection) = selection {
-            self.goto(Page::EditModpack(modpack_names[selection].clone()));
+            self.goto(Page::ManageModpack(modpack_names[selection].clone()));
         } else {
             self.go_back();
         }

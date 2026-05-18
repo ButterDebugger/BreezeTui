@@ -1,4 +1,4 @@
-use crate::{config::Config, utils::get_mod_names, App, Page};
+use crate::{config::Config, utils::paths::get_mod_names, App, Page};
 use console::style;
 use dialoguer::{theme::ColorfulTheme, Select};
 use std::{
